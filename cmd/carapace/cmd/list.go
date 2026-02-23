@@ -8,6 +8,7 @@ import (
 
 	"github.com/carapace-sh/carapace"
 	"github.com/carapace-sh/carapace-bin/cmd/carapace/cmd/completers"
+	"github.com/carapace-sh/carapace-bin/cmd/carapace/cmd/shim"
 	carapacebin "github.com/carapace-sh/carapace-bin/pkg/actions/tools/carapace"
 	"github.com/carapace-sh/carapace-bridge/pkg/choices"
 	"github.com/spf13/cobra"
@@ -17,10 +18,15 @@ var listCmd = &cobra.Command{
 	Use:   "--list",
 	Short: "list completers",
 	Args:  cobra.MaximumNArgs(1),
-	FParseErrWhitelist: cobra.FParseErrWhitelist{
-		UnknownFlags: true, // TODO remove - just to keep compability with tabdance until things are merged
-	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if cmd.Flag("init").Changed {
+			go func() {
+				if err := shim.Update(); err != nil {
+					carapace.LOG.Println(err.Error())
+				}
+			}()
+		}
+
 		filter := choices.Choice{}
 		if len(args) > 0 {
 			filter = choices.Parse(args[0])
@@ -50,6 +56,7 @@ var listCmd = &cobra.Command{
 func init() {
 	carapace.Gen(listCmd).Standalone()
 	listCmd.Flags().Bool("names", false, "only list names")
+	listCmd.Flags().Bool("init", false, "update shims")
 
 	carapace.Gen(listCmd).PositionalCompletion(
 		carapacebin.ActionCompleters(false).NoSpace(),
