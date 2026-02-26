@@ -10,8 +10,13 @@ import (
 
 func subcommandsAsFlags(cmd *cobra.Command, shorthandOnly bool, subcommands ...*cobra.Command) {
 	carapace.Gen(cmd).PreRun(func(cmd *cobra.Command, args []string) {
+		var nonposix bool
 		flags := pflag.NewFlagSet("subcommands", pflag.ContinueOnError)
 		for _, s := range subcommands {
+			if len(s.Aliases) > 0 {
+				nonposix = nonposix || len(s.Aliases[0]) > 1
+			}
+
 			switch {
 			case shorthandOnly:
 				if len(s.Aliases) > 0 {
@@ -31,7 +36,12 @@ func subcommandsAsFlags(cmd *cobra.Command, shorthandOnly bool, subcommands ...*
 		case strings.HasPrefix(args[0], "--"):
 			flags.Parse(args[:1])
 		case strings.HasPrefix(args[0], "-") && len(args[0]) > 1:
-			flags.Parse([]string{args[0][:2]})
+			switch {
+			case nonposix:
+				flags.Parse([]string{args[0]})
+			default:
+				flags.Parse([]string{args[0][:2]})
+			}
 		}
 
 		var subcommand *cobra.Command
