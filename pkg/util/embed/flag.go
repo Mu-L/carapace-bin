@@ -55,7 +55,7 @@ func subcommandsAsFlags(cmd *cobra.Command, shorthandOnly bool, subcommands ...*
 		})
 
 		switch {
-		case subcommand != nil:
+		case subcommand != nil && (!nonposix || len(args) > 1):
 			cmd.DisableFlagParsing = true
 			carapace.Gen(cmd).PositionalAnyCompletion(
 				carapace.ActionExecute(subcommand),
