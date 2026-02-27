@@ -15,6 +15,7 @@ func init() {
 	carapace.Gen(lockCmd).Standalone()
 
 	lockCmd.Flags().Bool("check", false, "Check if any changes have been made to the lock file. If yes, exit with a non-zero code")
+	lockCmd.Flags().Bool("dry-run", false, "Compute the lock file without writing to disk. Implies --no-install")
 	lockCmd.Flags().Bool("json", false, "Output the changes in JSON format")
 	lockCmd.PersistentFlags().StringP("manifest-path", "m", "", "The path to `pixi.toml`, `pyproject.toml`, or the workspace directory")
 	lockCmd.Flags().Bool("no-install", false, "Don't modify the environment, only modify the lock-file")
